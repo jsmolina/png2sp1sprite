@@ -67,6 +67,7 @@ setup(
     entry_points={
         'console_scripts': [
             'png2sp1sprite=png2sp1sprite:main',
+            'png2udg=png2sp1sprite:png2udg_main'
         ],
     },
 )
