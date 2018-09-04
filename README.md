@@ -14,7 +14,7 @@ png2sp1sprite catinv.png -i sprite_prota
 png2sp1sprite cat.png -i mothership_col > gr_window.asm
 ``` 
 
-* Then Create a file named juegozx2.c
+* Then Create your C game and use it!
 
 ```C
 #pragma output REGISTER_SP = 0xD000
