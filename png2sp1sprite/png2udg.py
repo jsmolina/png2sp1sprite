@@ -29,6 +29,7 @@ __version__ = "1.0.1"
 
 from argparse import ArgumentParser
 from PIL import Image
+from os.path import basename
 
 INK = (255, 255, 255)
 PAPER = (205, 0, 0)
@@ -80,6 +81,7 @@ def main():
         parser.error("required parameter: image")
 
     try:
+        name = basename(args.image).split('.')[0]
         image = Image.open(args.image)
     except IOError:
         parser.error("failed to open the image")
@@ -99,9 +101,8 @@ def main():
             col.append(get_value(pixel, animated=animated))
 
         rows.append(hex_formatted(col))
-
     fmt = "{}".format(', '.join(rows))
-    print("uchar fondo[] = {" + fmt + "}")
+    print("uchar " + name + "[] = {" + fmt + "}")
 
 if __name__ == "__main__":
     main()
