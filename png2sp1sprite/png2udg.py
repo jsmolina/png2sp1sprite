@@ -102,7 +102,7 @@ def main():
 
         rows.append(hex_formatted(col))
     fmt = "{}".format(', '.join(rows))
-    print("uchar " + name + "[] = {" + fmt + "}")
+    print("unsigned char " + name + "[] = {" + fmt + "};")
 
 if __name__ == "__main__":
     main()
