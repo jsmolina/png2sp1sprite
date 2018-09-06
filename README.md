@@ -78,5 +78,5 @@ https://www.z88dk.org/forum/viewtopic.php?id=10277
 
 Then sp1_MoveSprPix allows you to change the displayed sprite part. 
 
-e.g. if the sprite is 32x16, as it has mask, 16x2 = 32 + 16=48 + DELTA = 49 will be the second frame:
+e.g. if the sprite is 32x16, as it has mask, take the height=16, multiply by 2 (because of mask), and add a 16 bytes margin. 16x2 = 32 + 16=48 + DELTA = so 49 will be the second frame:
 `sp1_MoveSprPix(mothership_sprite, &full_screen, (void*) 49, x++, 0);`
