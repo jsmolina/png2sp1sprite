@@ -146,7 +146,10 @@ def main():
             # prepend a margin before frame
             row.append("")
             for i in range(0, 8):
-                row.append(" defb @11111111, @00000000")
+                if not args.bit:
+                    row.append(" defb @11111111, @00000000")
+                else:
+                    row.append(" defb @00000000")
 
             row.append("")
             row.append("._{}{}_f{}".format(args.id, bloque_num + 1, frame_num + 2))
