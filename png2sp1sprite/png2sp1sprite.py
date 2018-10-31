@@ -174,7 +174,10 @@ def main():
     print("; Original: {}, {} (={} x {} chars)".format(w, h, w/8, h/8))
     print("; Blocks: {}".format(len(bloques)))
     for i in range(0, 7):
-        print(" defb @11111111, @00000000")
+        if not args.bit:
+            print(" defb @11111111, @00000000")
+        else:
+            print(" defb @00000000")
 
     print("")
 
@@ -187,7 +190,10 @@ def main():
             print(row)
         print("")
         for i in range(0, 8):
-            print(" defb @11111111, @00000000")
+            if not args.bit:
+                print(" defb @11111111, @00000000")
+            else:
+                print(" defb @00000000")
         print("")
 
 
