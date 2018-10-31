@@ -88,6 +88,8 @@ def main():
     parser.add_argument("-f", "--fsize", dest="fsize", default=0, type=int,
                         help="Frame width, frames are aligned horizontally, with one pixel offset")
 
+    parser.add_argument("-b", "--bit", dest="bit", default=False, action="store_true")
+
     parser.add_argument("image", help="image to convert", nargs="?")
 
     args = parser.parse_args()
@@ -133,7 +135,10 @@ def main():
                 mask_col.append(get_mask_value(pixel, animated=animated))
 
             # cada fila es mascara, columna
-            row.append(" defb {}, {}".format(binary_formatted(mask_col), binary_formatted(col)))
+            if not args.bit:
+                row.append(" defb {}, {}".format(binary_formatted(mask_col), binary_formatted(col)))
+            else:
+                row.append(" defb {}".format(binary_formatted(col)))
 
         # add the frames for animation (if they exist) now, no need to check animated flag
         # code is a bit repeated from before, but improvements are for later...
