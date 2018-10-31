@@ -116,6 +116,9 @@ def main():
         fsize = args.fsize
         animated = True
 
+    if args.bit:
+        animated = False
+
     bloques = []
 
     # if image has 32px it will be 4 blocks of 8 pixels
