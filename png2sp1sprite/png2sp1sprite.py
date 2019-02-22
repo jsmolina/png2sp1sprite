@@ -90,6 +90,9 @@ def main():
 
     parser.add_argument("-b", "--bit", dest="bit", default=False, action="store_true")
 
+    parser.add_argument("-m", "--mask", dest="mask", default=None, action="store",
+                        help="Use it to pass mask in a different png file")
+
     parser.add_argument("image", help="image to convert", nargs="?")
 
     args = parser.parse_args()
@@ -99,10 +102,21 @@ def main():
 
     try:
         image = Image.open(args.image)
+        (w, h) = image.size
     except IOError:
         parser.error("failed to open the image")
+        exit(1)
 
-    (w, h) = image.size
+    mask = None
+    if args.mask:
+        try:
+            mask = Image.open(args.mask)
+            (wm, hm) = mask.size
+
+            if w != wm or h != hm:
+                parser.error("Mask size must be same as image")
+        except IOError:
+            parser.error("failed to open mask")
 
     if w % 8 or h % 8:
         parser.error("%r size is not multiple of 8" % args.image)
@@ -135,7 +149,11 @@ def main():
             for x in range(bloque, bloque + 8):
                 pixel = image.getpixel((x, y))
                 col.append(get_value(pixel, animated=animated))
-                mask_col.append(get_mask_value(pixel, animated=animated))
+                pixel_mask = pixel
+
+                if mask is not None:
+                    pixel_mask = mask.getpixel((x, y))
+                mask_col.append(get_mask_value(pixel_mask, animated=animated))
 
             # cada fila es mascara, columna
             if not args.bit:
