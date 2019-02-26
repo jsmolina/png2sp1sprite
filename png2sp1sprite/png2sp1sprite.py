@@ -93,6 +93,9 @@ def main():
     parser.add_argument("-m", "--mask", dest="mask", default=None, action="store",
                         help="Use it to pass mask in a different png file")
 
+    parser.add_argument("-s", "--section", dest="section", default='rodata_user', action="store",
+                        help="Specify BANK_2 to switch sprite to a different bank")
+
     parser.add_argument("image", help="image to convert", nargs="?")
 
     args = parser.parse_args()
@@ -193,7 +196,7 @@ def main():
         bloques.append(row)
 
 
-    print("SECTION rodata_user")
+    print("SECTION {}".format(args.section))
     print("")
     print("; Original: {}, {} (={} x {} chars)".format(w, h, w/8, h/8))
     print("; Blocks: {}".format(len(bloques)))
