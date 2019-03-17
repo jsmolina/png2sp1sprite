@@ -52,14 +52,16 @@ def get_value(rgb, animated=False):
         return "0" if not animated else "1"
 
 
-
-def hex_formatted(column):
+def do_formatted(column, asm=False):
     """
     Generates binary formatted value from column array
     :param column:
     :return:
     """
-    return hex(int('{}'.format(''.join(column)), 2))
+    if not asm:
+        return hex(int('{}'.format(''.join(column)), 2))
+    else:
+        return '@{}'.format(''.join(column))
 
 
 def main():
@@ -73,6 +75,9 @@ def main():
     parser.add_argument("-i", "--id", dest="id", default="sprite", type=str,
                         help="variable name (default: sprite)")
 
+    parser.add_argument("-a", "--asm", dest="asm",
+                        help="generate asm file", action='store_true', default=False)
+
     parser.add_argument("image", help="image to convert", nargs="?")
 
     args = parser.parse_args()
@@ -83,8 +88,10 @@ def main():
     try:
         name = basename(args.image).split('.')[0]
         image = Image.open(args.image)
+        asm = args.asm
     except IOError:
         parser.error("failed to open the image")
+        exit(1)
 
     (w, h) = image.size
 
@@ -98,11 +105,19 @@ def main():
         # vamos al bloque de 8 que toca (ej: 0 al 8, 8 al 16, 16 al 24, 24 al 32)
         for x in range(0, w):
             pixel = image.getpixel((x, y))
-            col.append(get_value(pixel, animated=animated))
+            col.append(get_value(pixel, animated=False))
 
-        rows.append(hex_formatted(col))
+        rows.append(do_formatted(col, asm=asm))
     fmt = "{}".format(', '.join(rows))
-    print("const uint8_t " + name + "[] = {" + fmt + "};")
+
+    if not asm:
+        print("const uint8_t " + name + "[] = {" + fmt + "};")
+    else:
+        print("SECTION rodata_user")
+        print("PUBLIC _{}".format(name))
+        print("._{}".format(name))
+
+        print("defb {}".format(fmt))
 
 if __name__ == "__main__":
     main()
