@@ -98,18 +98,22 @@ def main():
     if (w % 8) != 0 or h != 8:
         parser.error("%r size should be 8x8 8 but it is %sx%s" % (args.image, w, h))
 
-    rows = [] # 
-    for y in range(0, h):
-        mask_col = []
-        # vamos al bloque de 8 que toca (ej: 0 al 8, 8 al 16, 16 al 24, 24 al 32)
-        for frame in range(0, w, 8):
+    rows = []
+    blocks = []
+    fmt = ""
+    for bloque in range(0, w, 8):
+        for y in range(0, h):
             col = []
-            for x in range(frame, frame + 8):
+            # vamos al bloque de 8 que toca (ej: 0 al 8, 8 al 16, 16 al 24, 24 al 32)
+            for x in range(bloque, bloque + 8):
                 pixel = image.getpixel((x, y))
                 col.append(get_value(pixel, animated=False))
 
             rows.append(do_formatted(col, asm=asm))
-    fmt = "{}".format(', '.join(rows))
+        blocks.append(rows)
+
+    udgs = ["{}".format(', '.join(udg)) for udg in blocks]
+    fmt = "{}".format(', '.join(udgs))
 
     if not asm:
         print("const uint8_t " + name + "[] = {" + fmt + "};")
