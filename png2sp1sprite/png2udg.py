@@ -84,30 +84,31 @@ def main():
 
     if not args.image:
         parser.error("required parameter: image")
+    asm = args.asm
+    name = basename(args.image).split('.')[0]
 
     try:
-        name = basename(args.image).split('.')[0]
         image = Image.open(args.image)
-        asm = args.asm
     except IOError:
         parser.error("failed to open the image")
         exit(1)
 
     (w, h) = image.size
 
-    if w != 8 or h != 8:
-        parser.error("%r size must be 8x8 8" % args.image)
+    if (w % 8) != 0 or h != 8:
+        parser.error("%r size should be 8x8 8 but it is %sx%s" % (args.image, w, h))
 
-    rows = []
+    rows = [] # 
     for y in range(0, h):
-        col = []
         mask_col = []
         # vamos al bloque de 8 que toca (ej: 0 al 8, 8 al 16, 16 al 24, 24 al 32)
-        for x in range(0, w):
-            pixel = image.getpixel((x, y))
-            col.append(get_value(pixel, animated=False))
+        for frame in range(0, w, 8):
+            col = []
+            for x in range(frame, frame + 8):
+                pixel = image.getpixel((x, y))
+                col.append(get_value(pixel, animated=False))
 
-        rows.append(do_formatted(col, asm=asm))
+            rows.append(do_formatted(col, asm=asm))
     fmt = "{}".format(', '.join(rows))
 
     if not asm:
@@ -121,4 +122,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
