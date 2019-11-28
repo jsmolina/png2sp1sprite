@@ -6,15 +6,24 @@ from argparse import ArgumentParser
 from PIL import Image
 
 
+def get_int_from_rgb(rgb):
+    red = rgb[0]
+    green = rgb[1]
+    blue = rgb[2]
+    print red, green, blue
+    rgb_int = (red<<16) + (green<<8) + blue
+    return rgb_int
+
+
 def get_bitmap_value(rgb):
-    if rgb[0] > 0 or rgb[1] > 0 or rgb[2] > 0:
+    if get_int_from_rgb(rgb) > 0:
         return "1"
     else:
         return "0"
 
 
 def get_attribute_value(rgb):
-    return "{0:b}{1:b}{2:b}".format(rgb[0], rgb[1], rgb[2])
+    return "{0:b}".format(get_int_from_rgb(rgb))
 
 
 def main():
@@ -43,16 +52,27 @@ def main():
 
     mask = None
 
+    # force 8 bit per pixel
+    #image = image.convert('P')
     # Byte 1: bitmap value for 1st pixel line, 1st column (0-8)
     bloques = array('B')
-    for y in range(h):
-        for x in range(0, w, 8):
+    
+    # todo what about larger images?
+    for y in range(16):
+        for x in range(0, 16, 8):
             column_bits = ""
             for colpart in range(x, x + 8):
                 column_bits += get_bitmap_value(image.getpixel((x, y)))
-            bloques.append(int(column_bits,2))
+            bloques.append(int(column_bits, 2))
 
-    # todo faltaría los atributos
+    for x in range(0, 16, 8):
+        for y in range(0, 16, 2):
+            # Byte 33: attribute value for 1st and 2nd pixel line, 1st column
+            column_bits = ""
+            column_bits += get_attribute_value(image.getpixel((x, y)))
+            column_bits += get_attribute_value(image.getpixel((x, y + 1)))
+
+            bloques.append(int(column_bits, 2))
 
     with open('output.btitle', 'wb') as f:
         f.write(bloques)
