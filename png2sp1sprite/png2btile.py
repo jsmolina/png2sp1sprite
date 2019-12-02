@@ -101,7 +101,7 @@ def main():
 
             bloques.append(int(column_bits, 2))
 
-    with open('output.btitle', 'wb') as f:
+    with open('output.btile', 'wb') as f:
         f.write(bloques)
 
 
