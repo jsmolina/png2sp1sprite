@@ -20,19 +20,58 @@ def get_int_from_rgb(rgb):
 
 
 def get_bitmap_value(rgb):
-    if get_int_from_rgb(rgb) > 0:
-        return "1"
-    else:
+    if (rgb[0] == rgb[1] == rgb[2]) and rgb[0] != 0:
         return "0"
+    else:
+        return "1"
+
+
+def _rgb_no_bright(value):
+    return 160 <= value <= 220
+
+
+def _rgb_bright(value):
+    return value > 220
 
 
 def get_attribute_value(rgb):
-    value = get_int_from_rgb(rgb)
-    if value > 15:
-        print("WARNING! got color value of {0}, downgrading to 15".format(value))
-        value = 15
-    attr = "{0:b}".format(value)
-    return attr
+
+    # quick and dirty rgb map
+    if rgb[0] == 0 and rgb[1] == 0 and rgb[2] == 0:
+        ink = "0100"
+    elif rgb[0] < 2 and rgb[1] < 2 and _rgb_no_bright(rgb[2]):
+        ink = "1000"
+    elif _rgb_no_bright(rgb[0]) and rgb[1] < 2 and rgb[2] < 2:
+        ink = "0001"
+    elif _rgb_no_bright(rgb[0]) and rgb[1] < 1 and rgb[2] > 70:
+        ink = "1010"
+    elif rgb[0] < 2 and _rgb_no_bright(rgb[1]) and rgb[2] < 2:
+        ink = "0010"
+    elif rgb[0] < 2 and _rgb_no_bright(rgb[1]) and rgb[2] > 70:
+        ink = "1100"
+    elif rgb[0] > 70 and _rgb_no_bright(rgb[1]) and rgb[2] < 2:
+        ink = "0011"
+    elif _rgb_no_bright(rgb[0]) and _rgb_no_bright(rgb[1]) and _rgb_no_bright(rgb[2]):
+        ink = "1110"
+    # todo bright cases
+    elif rgb[0] < 2 and rgb[1] < 2 and _rgb_bright(rgb[2]):
+        ink = "1000"
+    elif _rgb_bright(rgb[0]) and rgb[1] < 2 and rgb[2] < 2:
+        ink = "0101"
+    elif _rgb_bright(rgb[0]) and rgb[1] < 1 and rgb[2] > 70:
+        ink = "1010"
+    elif rgb[0] < 2 and _rgb_bright(rgb[1]) and rgb[2] < 2:
+        ink = "0110"
+    elif rgb[0] < 2 and _rgb_bright(rgb[1]) and rgb[2] > 70:
+        ink = "1100"
+    elif rgb[0] > 70 and _rgb_bright(rgb[1]) and rgb[2] < 2:
+        ink = "0111"
+    elif _rgb_bright(rgb[0]) and _rgb_bright(rgb[1]) and _rgb_bright(rgb[2]):
+        ink = "1110"
+    else:
+        ink = "0011"
+
+    return ink
 
 
 def changeColorDepth(image, colorCount):
@@ -57,7 +96,6 @@ def main():
                             )
 
     parser.add_argument("--version", action="version", version="%(prog)s "  + __version__)
-    parser.add_argument("--convert", action="store_true", default=False)
 
     parser.add_argument("image", help="image to convert", nargs="?")
 
@@ -74,22 +112,23 @@ def main():
         exit(1)
         return
 
-    convert = args.convert
     mask = None
 
-    # force 8 bit per pixel
-    if convert:
-        image = image = image.convert('P')
     # Byte 1: bitmap value for 1st pixel line, 1st column (0-8)
     bloques = array('B')
+    b_count = 1
 
     # todo what about larger images?
     for y in range(16):
         for x in range(0, 16, 8):
             column_bits = ""
             for colpart in range(x, x + 8):
-                column_bits += get_bitmap_value(image.getpixel((x, y)))
+                column_bits += get_bitmap_value(image.getpixel((colpart, y)))
+
             bloques.append(int(column_bits, 2))
+            print("{}: bitmap value for {} pixel line, and columnn {} to {}: {}".format(b_count, y, x, x+8, hex(int(column_bits, 2))))
+
+            b_count += 1
 
     for x in range(0, 16, 8):
         for y in range(0, 16, 2):
@@ -98,8 +137,12 @@ def main():
             pixelline_one = get_attribute_value(image.getpixel((x, y)))
             pixelline_two = get_attribute_value(image.getpixel((x, y + 1)))
             column_bits = pixelline_one + pixelline_two
-
+            if pixelline_one == '1110' and pixelline_two == '1110':
+                column_bits = "00111000"
+            print("{}: Attr value for {} and {} pixel line, column {}: {}".format(b_count, y, y + 1, x,
+                                                                                  hex(int(column_bits, 2))))
             bloques.append(int(column_bits, 2))
+            b_count += 1
 
     with open('output.btile', 'wb') as f:
         f.write(bloques)
