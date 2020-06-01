@@ -46,9 +46,11 @@ def get_value(rgb, animated=False):
     """
 
     if rgb[0] > 0 or rgb[1] > 0 or rgb[2] > 0:
-        return "1" if not animated else "0"
+        return "1"
     else:
-        return "0" if not animated else "1"
+        return "0"
+
+MASK_STR = " defb {0}, {1}"
 
 
 def get_mask_value(rgb, animated=False):
@@ -58,11 +60,22 @@ def get_mask_value(rgb, animated=False):
         :param animated: It is a WTF from SP1. If I do animation it requires me to invert the values...
         :return:
         """
+    """
+    El de la izquierda es el dibujo en si mismo del sprite.
+     El bloque de la derecha indica las transparencias; en aquellas 
+     posiciones donde el valor sea 1, el sprite sera transparente y 
+     se vera lo que haya en el fondo.
 
-    if rgb[0] > 0 or rgb[1] > 0 or rgb[2] > 0:
-        return "0" if not animated else "1"
+    """
+    if rgb[0] == 255 and rgb[1] == 0 and rgb[2] == 0:
+        return "1"
+    elif rgb[0] == 255 and rgb[1] == 255 and rgb[2] == 255:
+        return "0"
+    elif rgb[0] == 0 and rgb[1] == 0 and rgb[2] == 0:
+        return "0"
     else:
-        return "1" if not animated else "0"
+        raise Exception("unable to determine mask! {0}".format(rgb))
+
 
 
 def binary_formatted(column):
@@ -78,7 +91,7 @@ def main():
     animated = False
 
     parser = ArgumentParser(description="png2sp1sprite",
-                            epilog="Copyright (C) 2018 Jordi Sesmero",
+                            epilog="Copyright (C) 2020 Jordi Sesmero",
                             )
 
     parser.add_argument("--version", action="version", version="%(prog)s "  + __version__)
@@ -156,11 +169,14 @@ def main():
 
                 if mask is not None:
                     pixel_mask = mask.getpixel((x, y))
-                mask_col.append(get_mask_value(pixel_mask, animated=animated))
+                try:
+                    mask_col.append(get_mask_value(pixel_mask, animated=animated))
+                except Exception as e:
+                    raise Exception("failed on {0},{1}: {2}".format(x,y, e))
 
-            # cada fila es mascara, columna
+            # cada fila es mascara, columna. OJO: esta repetido abajo!
             if not args.bit:
-                row.append(" defb {}, {}".format(binary_formatted(mask_col), binary_formatted(col)))
+                row.append(MASK_STR.format(binary_formatted(col), binary_formatted(mask_col)))
             else:
                 row.append(" defb {}".format(binary_formatted(col)))
 
@@ -185,11 +201,18 @@ def main():
                 for x in range(bloque_frame, bloque_frame + 8):
                     pixel = image.getpixel((x, y))
                     col.append(get_value(pixel, animated=animated))
-                    mask_col.append(get_mask_value(pixel, animated=animated))
 
-                # cada fila es mascara, columna
+                    pixel_mask = pixel
+                    if mask is not None:
+                        pixel_mask = mask.getpixel((x, y))
+                    try:
+                        mask_col.append(get_mask_value(pixel_mask, animated=animated))
+                    except Exception as e:
+                        raise Exception("failed on {0},{1}: {2}".format(x, y, e))
+
+                    # cada fila es mascara, columna. OJO: esta repetido arriba!
                 if not args.bit:
-                    row.append(" defb {}, {}".format(binary_formatted(mask_col), binary_formatted(col)))
+                    row.append(MASK_STR.format(binary_formatted(col), binary_formatted(mask_col)))
                 else:
                     row.append(" defb {}".format(binary_formatted(col)))
 
@@ -200,6 +223,7 @@ def main():
     print("")
     print("; Original: {}, {} (={} x {} chars)".format(w, h, w/8, h/8))
     print("; Blocks: {}".format(len(bloques)))
+    print("; remasked fixed")
     for i in range(0, 7):
         if not args.bit:
             print(" defb @11111111, @00000000")
