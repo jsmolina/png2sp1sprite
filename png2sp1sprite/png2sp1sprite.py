@@ -50,7 +50,7 @@ def get_value(rgb, animated=False):
     else:
         return "0"
 
-MASK_STR = " defb {0}, {1}"
+MASK_STR = " defb {1}, {0}"
 
 
 def get_mask_value(rgb, animated=False):
@@ -69,8 +69,6 @@ def get_mask_value(rgb, animated=False):
     """
     if rgb[0] == 255 and rgb[1] == 0 and rgb[2] == 0:
         return "1"
-    elif rgb[0] == 255 and rgb[1] == 255 and rgb[2] == 255:
-        return "0"
     elif rgb[0] == 0 and rgb[1] == 0 and rgb[2] == 0:
         return "0"
     else:
@@ -223,7 +221,7 @@ def main():
     print("")
     print("; Original: {}, {} (={} x {} chars)".format(w, h, w/8, h/8))
     print("; Blocks: {}".format(len(bloques)))
-    print("; remasked fixed")
+    print("; mask, sprite")
     for i in range(0, 7):
         if not args.bit:
             print(" defb @11111111, @00000000")
