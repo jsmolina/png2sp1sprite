@@ -22,7 +22,7 @@ setup(
     long_description=long_description,
 
     # The project's main homepage.
-    url='https://github.com/jsmolina/z88dk-tutorial-macos',
+    url='https://github.com/jsmolina/png2sp1sprite',
 
     # Author details
     author='Jordi Sesmero',
@@ -61,7 +61,7 @@ setup(
 
     packages=find_packages(exclude=['contrib', 'docs', 'tests*']),
 
-    install_requires=['Pillow==5.2.0', 'argparse'],
+    install_requires=['Pillow==7.1.1', 'argparse'],
 
 
     entry_points={
