@@ -44,6 +44,7 @@ int main()
 
   x=0;
   while(1) {
+    // 32 is the offset, if you set it to 0 it will show the bigger (first) cirlce
     sp1_MoveSprPix(circle_sprite, &full_screen, 32, x++, 4);
     intrinsic_halt();
     sp1_UpdateNow();
