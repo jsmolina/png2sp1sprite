@@ -16,6 +16,7 @@ IM2_DEFINE_ISR(isr) {}
 #define JUMP_POINT             ((unsigned char*)( (unsigned int)(JUMP_POINT_HIGH_BYTE*UI_256) + JUMP_POINT_HIGH_BYTE ))
 
 extern unsigned char circle_masked1[];
+extern unsigned char circle_masked2[];
 
 struct sp1_Rect full_screen = {0, 0, 32, 24};
 
@@ -43,7 +44,7 @@ int main()
 
   x=0;
   while(1) {
-    sp1_MoveSprPix(circle_sprite, &full_screen, 0, x++, 4);
+    sp1_MoveSprPix(circle_sprite, &full_screen, 32, x++, 4);
     intrinsic_halt();
     sp1_UpdateNow();
   }
