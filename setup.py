@@ -61,7 +61,7 @@ setup(
 
     packages=find_packages(exclude=['contrib', 'docs', 'tests*']),
 
-    install_requires=['Pillow==7.1.1', 'argparse'],
+    install_requires=['Pillow==10.0.1', 'argparse'],
 
 
     entry_points={
